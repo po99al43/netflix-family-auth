@@ -2,10 +2,8 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches:
-      - main
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build-and-push:
@@ -37,7 +35,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
 
@@ -53,11 +51,21 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## 🚀 快速開始 (Quick Start)
+
+            1. 下載下方 **Assets** 附件中的 `docker-compose.yml`
+            2. 在同目錄執行以下指令即可啟動：
+               ```bash
+               docker-compose up -d
+               ```
+            3. 用瀏覽器打開 `http://localhost:3000` 即可進行網頁端首次初始化！
+
+            ---
+            ### 📝 更新內容 (Changelog)
           generate_release_notes: true
           files: |
             docker-compose.yml
-
-
