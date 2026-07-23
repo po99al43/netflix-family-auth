@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  family_netflix-auth-server:
+    build: .
+    container_name: netflix_auth_server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # 掛載持久化資料目錄（儲存網頁初始化的密碼、credentials.json 與 token.json）
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
