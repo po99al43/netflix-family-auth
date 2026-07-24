@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import PasswordInput from "./PasswordInput";
 import {
 	Key,
 	Upload,
@@ -247,12 +248,11 @@ export default function SetupWizard({
 									<Lock className="w-3.5 h-3.5 text-blue-400" />
 									家人存取密碼 (查看 Netflix 驗證碼用)
 								</label>
-								<input
-									type="password"
+								<PasswordInput
 									value={userPin}
 									onChange={(e) => setUserPin(e.target.value)}
 									placeholder="請輸入 4 位數以上家人存取密碼"
-									className="w-full bg-[#2b2b2b] border border-[#444] rounded-md px-4 py-3 text-white focus:outline-none focus:border-[#e50914]"
+									className="w-full bg-[#2b2b2b] border border-[#444] rounded-md px-4 py-3 text-white focus:outline-none focus:border-[#e50914] pr-10"
 									required
 									autoFocus
 								/>
@@ -279,12 +279,11 @@ export default function SetupWizard({
 											<label className="block text-xs font-medium text-gray-400 mb-1">
 												設定管理員密碼
 											</label>
-											<input
-												type="password"
+											<PasswordInput
 												value={adminPin}
 												onChange={(e) => setAdminPin(e.target.value)}
 												placeholder="請輸入管理員專用密碼"
-												className="w-full bg-[#2b2b2b] border border-[#444] rounded-md px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#e50914]"
+												className="w-full bg-[#2b2b2b] border border-[#444] rounded-md px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#e50914] pr-10"
 												required={!sameAsUser}
 											/>
 										</div>
@@ -293,12 +292,11 @@ export default function SetupWizard({
 											<label className="block text-xs font-medium text-gray-400 mb-1">
 												再次確認管理員密碼
 											</label>
-											<input
-												type="password"
+											<PasswordInput
 												value={confirmAdminPin}
 												onChange={(e) => setConfirmAdminPin(e.target.value)}
 												placeholder="請再次輸入管理員密碼"
-												className="w-full bg-[#2b2b2b] border border-[#444] rounded-md px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#e50914]"
+												className="w-full bg-[#2b2b2b] border border-[#444] rounded-md px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#e50914] pr-10"
 												required={!sameAsUser}
 											/>
 										</div>

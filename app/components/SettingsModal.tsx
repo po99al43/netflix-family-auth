@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import PasswordInput from "./PasswordInput";
 import {
 	X,
 	Lock,
@@ -314,12 +315,11 @@ export default function SettingsModal({
 							onSubmit={handleAdminUnlock}
 							className="w-full space-y-4 max-w-sm"
 						>
-							<input
-								type="password"
+							<PasswordInput
 								value={inputAdminPin}
 								onChange={(e) => setInputAdminPin(e.target.value)}
 								placeholder="請輸入管理員密碼"
-								className="w-full bg-[#2b2b2b] border border-[#444] rounded px-4 py-3 text-center text-lg text-white outline-none focus:border-[#e50914]"
+								className="w-full bg-[#2b2b2b] border border-[#444] rounded px-4 py-3 text-center text-lg text-white outline-none focus:border-[#e50914] pl-10 pr-10"
 								autoFocus
 								required
 							/>
@@ -400,12 +400,12 @@ export default function SettingsModal({
 										<label className="block text-xs font-medium text-gray-400 mb-1">
 											新家人密碼
 										</label>
-										<input
-											type="password"
+										<PasswordInput
 											value={newUserPin}
 											onChange={(e) => setNewUserPin(e.target.value)}
 											placeholder="最少 4 個位數"
-											className="w-full bg-[#2b2b2b] border border-[#444] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e50914]"
+											className="w-full bg-[#2b2b2b] border border-[#444] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e50914] pr-9"
+											iconSizeClassName="w-4 h-4"
 											required
 										/>
 									</div>
@@ -414,12 +414,12 @@ export default function SettingsModal({
 										<label className="block text-xs font-medium text-gray-400 mb-1">
 											確認新家人密碼
 										</label>
-										<input
-											type="password"
+										<PasswordInput
 											value={confirmUserPin}
 											onChange={(e) => setConfirmUserPin(e.target.value)}
 											placeholder="再次輸入新家人密碼"
-											className="w-full bg-[#2b2b2b] border border-[#444] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e50914]"
+											className="w-full bg-[#2b2b2b] border border-[#444] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e50914] pr-9"
+											iconSizeClassName="w-4 h-4"
 											required
 										/>
 									</div>
@@ -461,12 +461,12 @@ export default function SettingsModal({
 										<label className="block text-xs font-medium text-gray-400 mb-1">
 											新管理員密碼
 										</label>
-										<input
-											type="password"
+										<PasswordInput
 											value={newAdminPin}
 											onChange={(e) => setNewAdminPin(e.target.value)}
 											placeholder="最少 4 個位數"
-											className="w-full bg-[#2b2b2b] border border-[#444] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e50914]"
+											className="w-full bg-[#2b2b2b] border border-[#444] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e50914] pr-9"
+											iconSizeClassName="w-4 h-4"
 											required
 										/>
 									</div>
@@ -475,12 +475,12 @@ export default function SettingsModal({
 										<label className="block text-xs font-medium text-gray-400 mb-1">
 											確認新管理員密碼
 										</label>
-										<input
-											type="password"
+										<PasswordInput
 											value={confirmAdminPin}
 											onChange={(e) => setConfirmAdminPin(e.target.value)}
 											placeholder="再次輸入新管理員密碼"
-											className="w-full bg-[#2b2b2b] border border-[#444] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e50914]"
+											className="w-full bg-[#2b2b2b] border border-[#444] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#e50914] pr-9"
+											iconSizeClassName="w-4 h-4"
 											required
 										/>
 									</div>

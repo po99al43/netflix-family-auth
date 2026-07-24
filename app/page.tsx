@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import SetupWizard from "./components/SetupWizard";
 import SettingsModal from "./components/SettingsModal";
+import PasswordInput from "./components/PasswordInput";
 
 interface Email {
 	id: string;
@@ -251,8 +252,7 @@ export default function Home() {
 						onSubmit={handleUnlock}
 						className="w-full flex flex-col gap-4"
 					>
-						<input
-							type="password"
+						<PasswordInput
 							inputMode="numeric"
 							value={pin}
 							onChange={(e) => {
@@ -260,7 +260,7 @@ export default function Home() {
 								setPinError(false);
 							}}
 							placeholder="請輸入密碼"
-							className={`w-full bg-[#2b2b2b] text-center text-2xl tracking-widest p-4 rounded-md outline-none border transition-colors ${
+							className={`w-full bg-[#2b2b2b] text-center text-2xl tracking-widest p-4 pl-10 pr-10 rounded-md outline-none border transition-colors ${
 								pinError
 									? "border-red-500"
 									: "border-[#444] focus:border-[#e50914]"
