@@ -125,7 +125,11 @@ export async function getNetflixEmails(auth: any) {
             const emailData = msgRes.data;
 
             const subject = emailData.payload?.headers?.find(h => h.name === 'Subject')?.value || '無主旨';
-            const date = emailData.payload?.headers?.find(h => h.name === 'Date')?.value || '';
+            const dateHeader = emailData.payload?.headers?.find(h => h.name === 'Date' || h.name === 'date')?.value;
+            const internalDateMs = emailData.internalDate ? Number(emailData.internalDate) : NaN;
+            const date = (dateHeader && !isNaN(Date.parse(dateHeader)))
+                ? dateHeader
+                : (!isNaN(internalDateMs) ? new Date(internalDateMs).toISOString() : new Date().toISOString());
 
             let bodyData = '';
             if (emailData.payload?.parts) {

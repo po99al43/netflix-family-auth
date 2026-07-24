@@ -378,15 +378,14 @@ export default function Home() {
 										{email.subject}
 									</h2>
 									<span className="text-xs text-gray-400 whitespace-nowrap bg-[#2b2b2b] px-2.5 py-1 rounded-md border border-[#383838]">
-										{new Date(email.date).toLocaleString(
-											"zh-TW",
-											{
-												month: "short",
-												day: "numeric",
-												hour: "2-digit",
-												minute: "2-digit",
-											},
-										)}
+										{email.date && !isNaN(Date.parse(email.date))
+											? new Date(email.date).toLocaleString("zh-TW", {
+													month: "short",
+													day: "numeric",
+													hour: "2-digit",
+													minute: "2-digit",
+											  })
+											: "剛剛"}
 									</span>
 								</div>
 
