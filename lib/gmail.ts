@@ -136,11 +136,34 @@ export async function getNetflixEmails(auth: any) {
             }
 
             // 提取驗證碼 (限定 4 位數字)
-            let code = null;
-            if (subject.includes('驗證碼') || decodedBody.includes('驗證碼') || decodedBody.includes('存取碼') || decodedBody.includes('代碼')) {
-                const codeMatch = decodedBody.match(/(?<!\d)\d{4}(?!\d)/);
-                if (codeMatch) {
-                    code = codeMatch[0];
+            let code: string | null = null;
+            const subjectCodeMatch = subject.match(/(?<!\d)\d{4}(?!\d)/);
+
+            if (subjectCodeMatch) {
+                code = subjectCodeMatch[0];
+            } else if (
+                subject.includes('驗證碼') ||
+                decodedBody.includes('驗證碼') ||
+                decodedBody.includes('存取碼') ||
+                decodedBody.includes('代碼') ||
+                /verification|code|pin/i.test(subject) ||
+                /verification|code|pin/i.test(decodedBody)
+            ) {
+                // 優先在關鍵字 (驗證碼/代碼/code/pin) 附近 30 個字元內尋找 4 位數字，避免誤抓頁尾版權年份 (如 2026) 或 CSS 數值
+                const keywordNearMatch = decodedBody.match(/(?:驗證碼|存取碼|代碼|驗證|verification|code|pin)[^\d]{0,30}(?<!\d)(\d{4})(?!\d)/i);
+                if (keywordNearMatch) {
+                    code = keywordNearMatch[1];
+                } else {
+                    // 若關鍵字附近未找到，先剔除版權宣告 (如 © 2026, Copyright 2026, 2026 Netflix) 避免干擾
+                    const cleanText = decodedBody
+                        .replace(/<[^>]*>?/gm, ' ')
+                        .replace(/(?:©|&copy;|copyright|\(c\))\s*\d{4}/gi, '')
+                        .replace(/\d{4}\s+netflix/gi, '');
+                    const matches = cleanText.matchAll(/(?<!\d)\d{4}(?!\d)/g);
+                    for (const match of matches) {
+                        code = match[0];
+                        break;
+                    }
                 }
             }
 
