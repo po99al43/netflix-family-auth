@@ -1,6 +1,11 @@
 import { google } from 'googleapis';
 import fs from 'fs/promises';
 import { getCredentialsPath, getTokenPath, saveToken } from './config';
+import {
+    MULTI_LANG_KEYWORDS_REGEX,
+    KEYWORD_NEARBY_CODE_REGEX,
+    NETFLIX_UPDATE_LINK_REGEX,
+} from './keywords';
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 
@@ -98,6 +103,27 @@ export async function getAuthClient() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractBodyData(payload: any): string {
+    if (!payload) return '';
+    if (payload.mimeType === 'text/html' && payload.body?.data) {
+        return payload.body.data;
+    }
+    if (payload.mimeType === 'text/plain' && payload.body?.data) {
+        return payload.body.data;
+    }
+    if (payload.body?.data) {
+        return payload.body.data;
+    }
+    if (payload.parts && Array.isArray(payload.parts)) {
+        for (const part of payload.parts) {
+            const data = extractBodyData(part);
+            if (data) return data;
+        }
+    }
+    return '';
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getNetflixEmails(auth: any) {
     const gmail = google.gmail({ version: 'v1', auth });
 
@@ -124,27 +150,14 @@ export async function getNetflixEmails(auth: any) {
 
             const emailData = msgRes.data;
 
-            const subject = emailData.payload?.headers?.find(h => h.name === 'Subject')?.value || '無主旨';
+            const subject = emailData.payload?.headers?.find(h => h.name === 'Subject' || h.name === 'subject')?.value || '無主旨';
             const dateHeader = emailData.payload?.headers?.find(h => h.name === 'Date' || h.name === 'date')?.value;
             const internalDateMs = emailData.internalDate ? Number(emailData.internalDate) : NaN;
             const date = (dateHeader && !isNaN(Date.parse(dateHeader)))
                 ? dateHeader
                 : (!isNaN(internalDateMs) ? new Date(internalDateMs).toISOString() : new Date().toISOString());
 
-            let bodyData = '';
-            if (emailData.payload?.parts) {
-                const part = emailData.payload.parts.find(p => p.mimeType === 'text/plain' || p.mimeType === 'text/html');
-                if (part && part.body?.data) {
-                    bodyData = part.body.data;
-                } else if (emailData.payload.parts[0]?.parts) {
-                    const innerPart = emailData.payload.parts[0].parts.find((p) => p.mimeType === 'text/plain' || p.mimeType === 'text/html');
-                    if (innerPart && innerPart.body?.data) {
-                        bodyData = innerPart.body.data;
-                    }
-                }
-            } else if (emailData.payload?.body?.data) {
-                bodyData = emailData.payload.body.data;
-            }
+            const bodyData = extractBodyData(emailData.payload);
 
             let decodedBody = '';
             if (bodyData) {
@@ -157,20 +170,13 @@ export async function getNetflixEmails(auth: any) {
 
             if (subjectCodeMatch) {
                 code = subjectCodeMatch[0];
-            } else if (
-                subject.includes('驗證碼') ||
-                decodedBody.includes('驗證碼') ||
-                decodedBody.includes('存取碼') ||
-                decodedBody.includes('代碼') ||
-                /verification|code|pin/i.test(subject) ||
-                /verification|code|pin/i.test(decodedBody)
-            ) {
-                // 優先在關鍵字 (驗證碼/代碼/code/pin) 附近 30 個字元內尋找 4 位數字，避免誤抓頁尾版權年份 (如 2026) 或 CSS 數值
-                const keywordNearMatch = decodedBody.match(/(?:驗證碼|存取碼|代碼|驗證|verification|code|pin)[^\d]{0,30}(?<!\d)(\d{4})(?!\d)/i);
+            } else if (MULTI_LANG_KEYWORDS_REGEX.test(subject) || MULTI_LANG_KEYWORDS_REGEX.test(decodedBody)) {
+                // 優先在多國語言關鍵字附近 30 個字元內尋找 4 位數字
+                const keywordNearMatch = decodedBody.match(KEYWORD_NEARBY_CODE_REGEX);
                 if (keywordNearMatch) {
                     code = keywordNearMatch[1];
                 } else {
-                    // 若關鍵字附近未找到，先剔除版權宣告 (如 © 2026, Copyright 2026, 2026 Netflix) 避免干擾
+                    // 若關鍵字附近未找到，先剔除版權宣告 (如 © 2026, Copyright 2026) 避免干擾
                     const cleanText = decodedBody
                         .replace(/<[^>]*>?/gm, ' ')
                         .replace(/(?:©|&copy;|copyright|\(c\))\s*\d{4}/gi, '')
@@ -185,7 +191,7 @@ export async function getNetflixEmails(auth: any) {
 
             // 提取專屬連結
             let updateLink: string | null = null;
-            const linkMatch = decodedBody.match(/https:\/\/(?:www\.)?netflix\.com\/(?:youraccount|account)\/[^"'\s>]+/i);
+            const linkMatch = decodedBody.match(NETFLIX_UPDATE_LINK_REGEX);
 
             if (linkMatch) {
                 updateLink = linkMatch[0].replace(/&amp;/g, '&');
