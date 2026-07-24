@@ -77,7 +77,19 @@ export async function getAuthClient() {
 
         const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirectUri);
         const tokenStr = await fs.readFile(tokenPath, 'utf-8');
-        oAuth2Client.setCredentials(JSON.parse(tokenStr));
+        const existingTokens = JSON.parse(tokenStr);
+        oAuth2Client.setCredentials(existingTokens);
+
+        // 監聽 Google OAuth 自動刷新 Token 事件，並將新 Token 持久化回存至 token.json
+        oAuth2Client.on('tokens', async (tokens) => {
+            try {
+                const updatedTokens = { ...existingTokens, ...tokens };
+                await saveToken(updatedTokens);
+            } catch (err) {
+                console.error('自動回存刷新 Token 失敗:', err);
+            }
+        });
+
         return oAuth2Client;
     } catch (err: unknown) {
         console.error('認證失敗:', (err as Error).message);
