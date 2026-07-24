@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  family_netflix-auth-server:
+  netflix-family-auth-server:
     # 同時指定 image 與 build：
     # 1. 一般使用者直接執行 `docker compose up -d` 會從 GHCR 拉取現成映像檔 (無須本機編譯)
     # 2. 本地開發者執行 `docker compose up -d --build` 會使用本地 Dockerfile 重新編譯
-    image: ghcr.io/po99al43/family_netflix_auth_web:latest
+    image: ghcr.io/po99al43/netflix-family-auth:latest
     build: .
     container_name: netflix_auth_server
     restart: unless-stopped
