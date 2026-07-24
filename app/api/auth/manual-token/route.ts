@@ -18,7 +18,11 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '請提供授權碼或完整網址' }, { status: 400 });
         }
 
-        await exchangeCodeForTokens(codeOrUrl, redirectUri);
+        const host = request.headers.get('host') || 'localhost:3000';
+        const protocol = request.headers.get('x-forwarded-proto') || 'http';
+        const fallbackRedirectUri = `${protocol}://${host}/api/auth/callback`;
+
+        await exchangeCodeForTokens(codeOrUrl, redirectUri || fallbackRedirectUri);
         return NextResponse.json({ success: true });
     } catch (error: unknown) {
         return NextResponse.json(
