@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useSyncExternalStore } from "react";
 import {
 	RefreshCw,
 	Mail,
@@ -47,21 +47,21 @@ export default function Home() {
 	const [error, setError] = useState<string | null>(null);
 	const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-	// 存取密碼鎖 (解鎖後看驗證碼)
-	const [pin, setPin] = useState<string>(() => {
-		if (typeof window !== "undefined") {
-			return localStorage.getItem("nf_pin") || "";
-		}
-		return "";
-	});
+	// 使用 useSyncExternalStore 讀取外部 localStorage (React 18/19 最佳實踐)
+	const storedPin = useSyncExternalStore(
+		(callback) => {
+			window.addEventListener("storage", callback);
+			return () => window.removeEventListener("storage", callback);
+		},
+		() => (typeof window !== "undefined" ? localStorage.getItem("nf_pin") || "" : ""),
+		() => ""
+	);
 
-	const [isUnlocked, setIsUnlocked] = useState<boolean>(() => {
-		if (typeof window !== "undefined") {
-			return Boolean(localStorage.getItem("nf_pin"));
-		}
-		return false;
-	});
+	const [inputPin, setInputPin] = useState<string | null>(null);
+	const [unlockedState, setUnlockedState] = useState<boolean | null>(null);
 
+	const pin = inputPin ?? storedPin;
+	const isUnlocked = unlockedState ?? Boolean(storedPin);
 	const [pinError, setPinError] = useState(false);
 
 	// 設定 Modal 狀態
@@ -137,10 +137,10 @@ export default function Home() {
 			const json = await res.json();
 
 			if (res.status === 403) {
-				setIsUnlocked(false);
+				setUnlockedState(false);
 				setPinError(true);
 				localStorage.removeItem("nf_pin");
-				setPin("");
+				setInputPin("");
 				return;
 			}
 
@@ -171,10 +171,10 @@ export default function Home() {
 				if (ignore) return;
 
 				if (res.status === 403) {
-					setIsUnlocked(false);
+					setUnlockedState(false);
 					setPinError(true);
 					localStorage.removeItem("nf_pin");
-					setPin("");
+					setInputPin("");
 					return;
 				}
 
@@ -199,7 +199,8 @@ export default function Home() {
 	const handleUnlock = (e: React.FormEvent) => {
 		e.preventDefault();
 		localStorage.setItem("nf_pin", pin);
-		setIsUnlocked(true);
+		setUnlockedState(true);
+		setInputPin(pin);
 		setPinError(false);
 	};
 
@@ -255,7 +256,7 @@ export default function Home() {
 							inputMode="numeric"
 							value={pin}
 							onChange={(e) => {
-								setPin(e.target.value);
+								setInputPin(e.target.value);
 								setPinError(false);
 							}}
 							placeholder="請輸入密碼"
